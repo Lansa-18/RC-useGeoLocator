@@ -1,23 +1,20 @@
 import { useState } from "react";
 
-// MY SOLUTION
-function useGeolocation(errMessage, callback) {
+function useGeolocation() {
   const [position, setPosition] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   function getPosition() {
-    callback?.();
-
     if (!navigator.geolocation)
-      return setError(errMessage);
+      return setError("Your browser does not support geolocation");
 
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setPosition({
           lat: pos.coords.latitude,
-          lng: pos.coords.longitude
+          lng: pos.coords.longitude,
         });
         setIsLoading(false);
       },
@@ -27,46 +24,28 @@ function useGeolocation(errMessage, callback) {
       }
     );
   }
-  
-  return { position, isLoading, error, getPosition };
+
+  return { isLoading, error, position, getPosition };
 }
 
 export default function App() {
   const [countClicks, setCountClicks] = useState(0);
+  const {
+    isLoading,
+    error,
+    position: { lat, lng },
+    getPosition,
+  } = useGeolocation();
 
-  const {position, isLoading, error, getPosition} = useGeolocation("Your browser does not support geolocation", function() {
+  function handleCLick() {
     setCountClicks((count) => count + 1);
-  });
-
-  // function getPosition() {
-  //   setCountClicks((count) => count + 1);
-
-  //   if (!navigator.geolocation)
-  //     return setError("Your browser does not support geolocation");
-
-  //   setIsLoading(true);
-  //   navigator.geolocation.getCurrentPosition(
-  //     (pos) => {
-  //       setPosition({
-  //         lat: pos.coords.latitude,
-  //         lng: pos.coords.longitude
-  //       });
-  //       setIsLoading(false);
-  //     },
-  //     (error) => {
-  //       setError(error.message);
-  //       setIsLoading(false);
-  //     }
-  //   );
-  // }
-
-
-  const { lat, lng } = position;
+    getPosition();
+  }
 
   return (
     <div>
-      <button onClick={getPosition} disabled={isLoading}>
-        Get my position
+      <button onClick={handleCLick} disabled={isLoading}>
+        Get my position (Jonas)
       </button>
 
       {isLoading && <p>Loading position...</p>}
